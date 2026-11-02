@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+/* Dark mode follows the `.dark` class on <html>, set by public/theme-init.js and src/lib/theme.ts. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+  Design tokens. Components use semantic names (bg-card, text-muted-foreground,
+  border-border, bg-primary…), never raw hex values, so a rebrand or a new
+  theme only touches this file.
+*/
+:root {
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --muted: #f1f5f9;
+  --muted-foreground: #475569;
+  --border: #e2e8f0;
+  --input: #cbd5e1;
+  --ring: #3b65f6;
+  --primary: #2546eb;
+  --primary-foreground: #ffffff;
+  --primary-soft: #eef4ff;
+  --link: #2546eb;
+  --destructive: #c81e1e;
+  --destructive-foreground: #ffffff;
+  --success: #047857;
+  --warning: #92400e;
+}
+
+.dark {
+  --background: #0b1120;
+  --foreground: #e2e8f0;
+  --card: #111827;
+  --muted: #172033;
+  --muted-foreground: #94a3b8;
+  --border: #1f2a3d;
+  --input: #334155;
+  --ring: #608bfa;
+  --primary: #3b65f6;
+  --primary-foreground: #ffffff;
+  --primary-soft: #171d54;
+  --link: #93b4fd;
+  --destructive: #f87171;
+  --destructive-foreground: #0b1120;
+  --success: #34d399;
+  --warning: #fbbf24;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-link: var(--link);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+  }
+
+  *,
+  ::before,
+  ::after {
+    @apply border-border;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
