@@ -14,6 +14,7 @@ A production-grade **React 19 + TypeScript** single-page app starter, built with
 ## Contents
 
 - [Highlights](#highlights)
+- [Use this template](#use-this-template)
 - [Getting started](#getting-started)
 - [Scripts](#scripts)
 - [Project structure](#project-structure)
@@ -41,6 +42,39 @@ A production-grade **React 19 + TypeScript** single-page app starter, built with
 | **Quality**  | Strict TypeScript, ESLint (`strictTypeChecked`, hooks, jsx-a11y, import boundaries), Prettier, React Compiler                                                   |
 | **Testing**  | Vitest + Testing Library (unit and component), Playwright (e2e on desktop and mobile), axe checks in light and dark mode                                        |
 | **Delivery** | GitHub Actions CI, Dependabot, Docker (unprivileged nginx), Vercel config, strict CSP verified by the e2e suite                                                 |
+
+## Use this template
+
+**1. Create your repository.** Click **Use this template → Create a new repository** at the top of this page. Your new repository gets a clean history and no link back to this one. Or use the GitHub CLI:
+
+```bash
+gh repo create my-app --template masabqurban/React.js-Template --private --clone
+cd my-app
+```
+
+Prefer no Git history at all? Run `npx degit masabqurban/React.js-Template my-app`.
+
+**2. Install and run it.**
+
+```bash
+npm install
+npm run dev    # http://localhost:5173, demo@example.com / password123 on the mock API
+```
+
+**3. Make it yours.**
+
+- `package.json`: change `"name"` from `reactjs-template`.
+- `VITE_APP_NAME` in `.env.example`, the colour tokens in `src/index.css`, and `public/favicon.svg`.
+- `src/config/navigation.ts` for the sidebar.
+- Replace the copyright holder in `LICENSE` (or choose another license), and rewrite this README for your project.
+
+**4. Remove what you don't need.** The demo is there to show the patterns end to end. Keep the parts you'll build on and delete the rest:
+
+- **Connect your API:** set `VITE_API_URL` in `.env.local`. The mock API switches off automatically, and `src/mocks/` stays available for tests and offline work. Adjust the Zod schemas in each feature's `schemas/` to match your contracts.
+- Delete a demo screen by removing its `src/features/<name>/` folder, its route files under `src/routes/_app/` and its nav item. The route tree regenerates and `npm run typecheck` shows what's left to fix.
+- Pair it with the [Node.js Template](https://github.com/masabqurban/Node.js-Template), which implements the same API contract.
+
+**5. Turn on the repository settings.** In **Settings → Code security**, enable Dependabot alerts and private vulnerability reporting (`SECURITY.md` points reporters there). CI in `.github/workflows/` runs on your first push with no secrets required. Add branch protection on `main` that requires it to pass.
 
 ## Getting started
 
