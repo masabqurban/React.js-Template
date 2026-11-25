@@ -29,7 +29,7 @@ export const env = envSchema.parse({
  */
 export const mocksEnabled = env.VITE_ENABLE_MOCKS ?? !env.VITE_API_URL;
 
-/** The mock API answers on the app's own origin, under /api. */
+/** The mock API answers on the app's own origin, under /api/v1. */
 export const apiBaseUrl =
   env.VITE_API_URL ??
-  (mocksEnabled ? `${window.location.origin}/api` : undefined);
+  (mocksEnabled ? `${window.location.origin}/api/v1` : undefined);

@@ -3,15 +3,15 @@ import { delay, http, HttpResponse } from "msw";
 import { db, DEMO_CREDENTIALS, nextUserId, type MockUser } from "./db";
 
 /*
- * A small REST API, shaped like a real backend:
+ * A small REST API, shaped like a real backend (matching Node.js-Template):
  *   POST /auth/login · POST /auth/refresh · POST /auth/logout
  *   GET/PATCH /me · GET /dashboard/summary
  *   GET/POST /users · GET/PATCH/DELETE /users/:id
  *
- * Handlers match any origin (`*\/api/...`), so they work in the browser, in
+ * Handlers match any origin (`*\/api/v1/...`), so they work in the browser, in
  * Vitest and against whatever VITE_API_URL is set to.
  */
-const api = (path: string) => `*/api${path}`;
+const api = (path: string) => `*/api/v1${path}`;
 
 /** Simulated network latency, so loading states are visible in development. */
 const latency = () => delay(import.meta.env.MODE === "test" ? 0 : 250);
@@ -113,7 +113,8 @@ export const handlers = [
   http.get(api("/dashboard/summary"), async ({ request }) => {
     await latency();
     if (!userFromAccessToken(request)) return unauthorized();
-    const active = db.users.filter((u) => u.status === "active").length;
+    const count = (status: MockUser["status"]) =>
+      db.users.filter((u) => u.status === status).length;
     return HttpResponse.json({
       data: {
         stats: [
@@ -122,35 +123,38 @@ export const handlers = [
             label: "Total users",
             value: db.users.length,
             change: 0.124,
+            unit: "count",
+          },
+          {
+            key: "new",
+            label: "New this month",
+            value: 8,
+            change: 0.06,
+            unit: "count",
           },
           {
             key: "active",
             label: "Active users",
-            value: active,
+            value: count("active"),
             change: 0.052,
+            unit: "count",
           },
           {
-            key: "revenue",
-            label: "Monthly revenue",
-            value: 48_250,
-            change: 0.087,
-            unit: "currency",
-          },
-          {
-            key: "churn",
-            label: "Churn rate",
-            value: 2.4,
-            change: -0.013,
-            unit: "percent",
+            key: "pending",
+            label: "Pending invites",
+            value: count("invited"),
+            change: -0.1,
+            unit: "count",
           },
         ],
+        suspended: count("suspended"),
         signups: [
-          { month: "May", count: 42 },
-          { month: "Jun", count: 58 },
-          { month: "Jul", count: 51 },
-          { month: "Aug", count: 73 },
-          { month: "Sep", count: 88 },
-          { month: "Oct", count: 96 },
+          { month: "Jun", count: 42 },
+          { month: "Jul", count: 58 },
+          { month: "Aug", count: 51 },
+          { month: "Sep", count: 73 },
+          { month: "Oct", count: 88 },
+          { month: "Nov", count: 96 },
         ],
       },
     });
@@ -200,7 +204,11 @@ export const handlers = [
 
   http.post(api("/users"), async ({ request }) => {
     await latency();
-    if (!userFromAccessToken(request)) return unauthorized();
+    const actor = userFromAccessToken(request);
+    if (!actor) return unauthorized();
+    if (actor.role !== "admin") {
+      return error(403, "FORBIDDEN", "You do not have permission.");
+    }
     const body = (await request.json()) as UserInput;
     if (emailTaken(body.email)) {
       return error(
@@ -225,10 +233,25 @@ export const handlers = [
 
   http.patch(api("/users/:id"), async ({ request, params }) => {
     await latency();
-    if (!userFromAccessToken(request)) return unauthorized();
+    const actor = userFromAccessToken(request);
+    if (!actor) return unauthorized();
+    if (actor.role !== "admin") {
+      return error(403, "FORBIDDEN", "You do not have permission.");
+    }
     const user = db.users.find((u) => u.id === params.id);
     if (!user) return error(404, "NOT_FOUND", "User not found.");
     const body = (await request.json()) as Partial<UserInput>;
+    if (
+      actor.id === user.id &&
+      ((body.role !== undefined && body.role !== user.role) ||
+        (body.status !== undefined && body.status !== "active"))
+    ) {
+      return error(
+        422,
+        "CANNOT_MODIFY_SELF",
+        "You can't change your own role or status.",
+      );
+    }
     if (body.email && emailTaken(body.email, user.id)) {
       return error(
         409,
@@ -247,6 +270,9 @@ export const handlers = [
     await latency();
     const actor = userFromAccessToken(request);
     if (!actor) return unauthorized();
+    if (actor.role !== "admin") {
+      return error(403, "FORBIDDEN", "You do not have permission.");
+    }
     if (actor.id === params.id) {
       return error(
         422,

@@ -15,6 +15,7 @@ export const dashboardSummarySchema = z.object({
       unit: z.enum(["count", "currency", "percent"]).default("count"),
     }),
   ),
+  suspended: z.number().int().min(0).optional(),
   signups: z.array(
     z.object({ month: z.string(), count: z.number().int().min(0) }),
   ),

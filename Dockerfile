@@ -6,7 +6,7 @@
 #   docker run -p 8080:8080 reactjs-template
 #
 # With a real API:
-#   docker build -t reactjs-template --build-arg VITE_API_URL=https://api.example.com .
+#   docker build -t reactjs-template --build-arg VITE_API_URL=https://api.example.com/api/v1 .
 #   docker run -p 8080:8080 -e API_ORIGIN=https://api.example.com reactjs-template
 
 # ── build ────────────────────────────────────────────────────────────────────

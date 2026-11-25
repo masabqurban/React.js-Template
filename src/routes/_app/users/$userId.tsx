@@ -1,5 +1,6 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 
+import { useSession } from "@/features/auth";
 import { UserDetailPage, userQueryOptions } from "@/features/users";
 import { isApiError } from "@/lib/api";
 
@@ -22,9 +23,12 @@ export const Route = createFileRoute("/_app/users/$userId")({
 function UserDetailRoute() {
   const { userId } = Route.useParams();
   const navigate = Route.useNavigate();
+  const currentUser = useSession();
   return (
     <UserDetailPage
       userId={userId}
+      canManage={currentUser?.role === "admin"}
+      isSelf={currentUser?.id === userId}
       onDeleted={() => void navigate({ to: "/users" })}
     />
   );

@@ -24,6 +24,8 @@ type UserFormDialogProps = {
   onOpenChange: (open: boolean) => void;
   /** Edit this user, or create a new one when omitted. */
   user?: User;
+  /** Editing the signed-in user disables role and status changes to prevent self-lockout. */
+  isSelf?: boolean;
 };
 
 /** Create or edit a user. Validation runs on the client; conflicts come back from the API. */
@@ -31,6 +33,7 @@ export function UserFormDialog({
   open,
   onOpenChange,
   user,
+  isSelf = false,
 }: UserFormDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -46,6 +49,7 @@ export function UserFormDialog({
         <UserForm
           key={user?.id ?? "new"}
           user={user}
+          isSelf={isSelf}
           onDone={() => onOpenChange(false)}
         />
       </DialogContent>
@@ -53,7 +57,15 @@ export function UserFormDialog({
   );
 }
 
-function UserForm({ user, onDone }: { user?: User; onDone: () => void }) {
+function UserForm({
+  user,
+  isSelf,
+  onDone,
+}: {
+  user?: User;
+  isSelf: boolean;
+  onDone: () => void;
+}) {
   const createUser = useCreateUser();
   const updateUser = useUpdateUser();
   const form = useForm<UserFormInput, unknown, UserFormValues>({
@@ -113,7 +125,7 @@ function UserForm({ user, onDone }: { user?: User; onDone: () => void }) {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <FormField label="Role" error={errors.role?.message}>
-          <NativeSelect {...form.register("role")}>
+          <NativeSelect {...form.register("role")} disabled={isSelf}>
             {userRoles.map((role) => (
               <option key={role} value={role}>
                 {capitalize(role)}
@@ -123,7 +135,7 @@ function UserForm({ user, onDone }: { user?: User; onDone: () => void }) {
         </FormField>
 
         <FormField label="Status" error={errors.status?.message}>
-          <NativeSelect {...form.register("status")}>
+          <NativeSelect {...form.register("status")} disabled={isSelf}>
             {userStatuses.map((status) => (
               <option key={status} value={status}>
                 {capitalize(status)}

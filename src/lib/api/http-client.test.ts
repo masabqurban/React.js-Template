@@ -6,7 +6,7 @@ import { server } from "@/mocks/node";
 import { isApiError } from "./api-error";
 import { buildUrl, createHttpClient } from "./http-client";
 
-const BASE = "http://test.local/api";
+const BASE = "http://test.local/api/v1";
 const client = createHttpClient({ baseUrl: BASE });
 const itemSchema = z.object({ id: z.number() });
 
@@ -14,7 +14,7 @@ describe("buildUrl", () => {
   it("joins paths and skips empty query values", () => {
     expect(
       buildUrl(BASE, "/users", { page: 2, q: "", role: undefined }).toString(),
-    ).toBe("http://test.local/api/users?page=2");
+    ).toBe("http://test.local/api/v1/users?page=2");
   });
 });
 

@@ -16,9 +16,13 @@ import { UserFormDialog } from "./user-form-dialog";
 export function UserDetailPage({
   userId,
   onDeleted,
+  canManage = false,
+  isSelf = false,
 }: {
   userId: string;
   onDeleted: () => void;
+  canManage?: boolean;
+  isSelf?: boolean;
 }) {
   const { data: user } = useSuspenseQuery(userQueryOptions(userId));
   const [editing, setEditing] = useState(false);
@@ -51,16 +55,20 @@ export function UserDetailPage({
       <PageHeader
         title={user.name}
         actions={
-          <>
-            <Button variant="secondary" onClick={() => setEditing(true)}>
-              <Pencil aria-hidden />
-              Edit
-            </Button>
-            <Button variant="destructive" onClick={() => setDeleting(true)}>
-              <Trash2 aria-hidden />
-              Delete
-            </Button>
-          </>
+          canManage ? (
+            <>
+              <Button variant="secondary" onClick={() => setEditing(true)}>
+                <Pencil aria-hidden />
+                Edit
+              </Button>
+              {!isSelf ? (
+                <Button variant="destructive" onClick={() => setDeleting(true)}>
+                  <Trash2 aria-hidden />
+                  Delete
+                </Button>
+              ) : null}
+            </>
+          ) : undefined
         }
       />
 
@@ -85,7 +93,12 @@ export function UserDetailPage({
         </CardContent>
       </Card>
 
-      <UserFormDialog open={editing} onOpenChange={setEditing} user={user} />
+      <UserFormDialog
+        open={editing}
+        onOpenChange={setEditing}
+        user={user}
+        isSelf={isSelf}
+      />
       <DeleteUserDialog
         user={deleting ? user : null}
         onOpenChange={setDeleting}

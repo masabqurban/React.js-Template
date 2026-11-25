@@ -42,13 +42,20 @@ import { UserFormDialog } from "./user-form-dialog";
 type UsersPageProps = {
   search: UsersSearch;
   onSearchChange: (patch: Partial<UsersSearch>) => void;
+  canManage?: boolean;
+  currentUserId?: string;
 };
 
 /**
  * The list reads all of its state (page, search, filters) from the URL via
  * props, so the route owns navigation and the page stays easy to test.
  */
-export function UsersPage({ search, onSearchChange }: UsersPageProps) {
+export function UsersPage({
+  search,
+  onSearchChange,
+  canManage = false,
+  currentUserId,
+}: UsersPageProps) {
   const { data } = useSuspenseQuery(usersQueryOptions(search));
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<User | undefined>();
@@ -70,10 +77,12 @@ export function UsersPage({ search, onSearchChange }: UsersPageProps) {
         title="Users"
         description="Manage who has access to your workspace."
         actions={
-          <Button onClick={() => openForm()}>
-            <Plus aria-hidden />
-            Add user
-          </Button>
+          canManage ? (
+            <Button onClick={() => openForm()}>
+              <Plus aria-hidden />
+              Add user
+            </Button>
+          ) : undefined
         }
       />
 
@@ -163,9 +172,11 @@ export function UsersPage({ search, onSearchChange }: UsersPageProps) {
                 <Th>Role</Th>
                 <Th>Status</Th>
                 <Th>Joined</Th>
-                <Th>
-                  <span className="sr-only">Actions</span>
-                </Th>
+                {canManage ? (
+                  <Th>
+                    <span className="sr-only">Actions</span>
+                  </Th>
+                ) : null}
               </tr>
             </thead>
             <tbody>
@@ -194,32 +205,36 @@ export function UsersPage({ search, onSearchChange }: UsersPageProps) {
                       {formatDate(user.createdAt)}
                     </time>
                   </Td>
-                  <Td className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          aria-label={`Actions for ${user.name}`}
-                        >
-                          <MoreHorizontal aria-hidden />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onSelect={() => openForm(user)}>
-                          <Pencil aria-hidden />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onSelect={() => setDeleting(user)}
-                          className="text-destructive [&_svg]:text-destructive"
-                        >
-                          <Trash2 aria-hidden />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </Td>
+                  {canManage ? (
+                    <Td className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label={`Actions for ${user.name}`}
+                          >
+                            <MoreHorizontal aria-hidden />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onSelect={() => openForm(user)}>
+                            <Pencil aria-hidden />
+                            Edit
+                          </DropdownMenuItem>
+                          {user.id !== currentUserId ? (
+                            <DropdownMenuItem
+                              onSelect={() => setDeleting(user)}
+                              className="text-destructive [&_svg]:text-destructive"
+                            >
+                              <Trash2 aria-hidden />
+                              Delete
+                            </DropdownMenuItem>
+                          ) : null}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </Td>
+                  ) : null}
                 </tr>
               ))}
             </tbody>
@@ -236,6 +251,7 @@ export function UsersPage({ search, onSearchChange }: UsersPageProps) {
         open={formOpen}
         onOpenChange={setFormOpen}
         user={editing}
+        isSelf={editing?.id !== undefined && editing.id === currentUserId}
       />
       <DeleteUserDialog
         user={deleting}

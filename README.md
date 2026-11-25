@@ -169,7 +169,7 @@ Route guards only control the UI. Your API must authorise every request itself.
 - **Vitest:** the same handlers run in Node (`src/mocks/node.ts`), so component tests exercise the real HTTP client.
 - **Contract boundary:** the mocks never import frontend code. The UI validates mock responses exactly as it would real ones.
 
-**Going live:** set `VITE_API_URL`. Mocks switch off automatically, and the request paths in each feature's `api/` folder are the endpoints your backend needs to implement.
+**Going live:** set `VITE_API_URL` (e.g. `http://localhost:4000/api/v1` for the companion [Node.js Template](https://github.com/masabqurban/Node.js-Template)). Mocks switch off automatically, and the `/api/v1/*` paths in each feature's `api/` folder are the endpoints your backend needs to implement.
 
 ## Performance
 
@@ -210,12 +210,12 @@ Component tests render real features against the MSW handlers, with no mocking o
 
 ## Deployment
 
-**Vercel / Netlify / any static host:** run `npm run build` and serve `dist/`. Every route must fall back to `index.html` (`vercel.json` already does this).
+**Vercel / Netlify / any static host:** run `npm run build` and serve `dist/`. Every route must fall back to `index.html` (`vercel.json` already does this). If `VITE_API_URL` points to another origin, add that origin to `connect-src` in `vercel.json` (by default `vercel.json` sets `connect-src 'self'`; `vite preview` adds `VITE_API_URL`'s origin automatically).
 
 **Docker:**
 
 ```bash
-docker build -t reactjs-template --build-arg VITE_API_URL=https://api.example.com .
+docker build -t reactjs-template --build-arg VITE_API_URL=https://api.example.com/api/v1 .
 docker run -p 8080:8080 -e API_ORIGIN=https://api.example.com reactjs-template
 ```
 

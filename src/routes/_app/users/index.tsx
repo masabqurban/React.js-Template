@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { useSession } from "@/features/auth";
 import {
   UsersPage,
   usersQueryOptions,
@@ -22,10 +23,13 @@ export const Route = createFileRoute("/_app/users/")({
 function UsersRoute() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
+  const currentUser = useSession();
 
   return (
     <UsersPage
       search={search}
+      canManage={currentUser?.role === "admin"}
+      currentUserId={currentUser?.id}
       onSearchChange={(patch) =>
         void navigate({
           search: (prev) => mergeSearch(prev, patch),

@@ -47,9 +47,11 @@ export function DashboardPage({ userName }: { userName: string }) {
 
       <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {summary.stats.map((stat) => {
-          // For churn, going down is good.
+          // For pending invites / churn, going down is good.
           const good =
-            stat.key === "churn" ? stat.change <= 0 : stat.change >= 0;
+            stat.key === "pending" || stat.key === "churn"
+              ? stat.change <= 0
+              : stat.change >= 0;
           const Trend = stat.change >= 0 ? TrendingUp : TrendingDown;
           return (
             <li key={stat.key}>
